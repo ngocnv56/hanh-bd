@@ -45,6 +45,7 @@
   <body>
     <canvas id="canvas" style="position:absolute; width:100%; height:100%;">Canvas is not supported in your browser.</canvas>
     <div class="container" style="position:absolute; width:100%; height:100%;">
+      <div class="message" style="margin:2em;"></div>
       <div class="clock clock-item" style="margin:2em;"></div>
     </div>
     
@@ -55,15 +56,25 @@
     var currentDate = new Date();
     // Set some date in the future. In this case, it's always Jan 1
     // var futureDate  = new Date(2019, 1, 9);
-          var futureDate  = new Date(2019, 1, 7, 19, 1);
+          var futureDate  = new Date(2019, 1, 7, 19, 12);
     // Calculate the difference in seconds between the future and current date
     var diff = futureDate.getTime() / 1000 - currentDate.getTime() / 1000;
-    // Instantiate a coutdown FlipClock
-    clock = $('.clock').FlipClock(diff, {
-        clockFace: 'DailyCounter',
-        countdown: true
+    
+      // Instantiate a coutdown FlipClock
+      clock = $('.clock').FlipClock(diff, {
+          clockFace: 'DailyCounter',
+          countdown: true,
+          callbacks: {
+                stop: function() {
+                    // Do whatever you want to do here,
+                    // that may include hiding the clock 
+                    // or displaying the image you mentioned
+                    $('.message').html("<div class='cube-face-front'>HAPPY </br> BIRTHDAY!</div><div class='baloon'><img src='http://www.iconhot.com/icon/png/event-people/512/balloons-1.png'/></div></div>");
+                }
+            }
+        });
       });
-    });
+  
 
     </script>
     <script src="lib/firework.js"></script>
