@@ -129,34 +129,34 @@ position:absolute;
     <script type="text/javascript">
     var clock;
     $(document).ready(function() {
-    // Grab the current date
-    var currentDate = new Date();
-    // Set some date in the future. In this case, it's always Jan 1
-    // var futureDate  = new Date(2019, 1, 9);
-          var futureDate  = new Date(2019, 1, 7, 19, 12);
-    // Calculate the difference in seconds between the future and current date
-    var diff = futureDate.getTime() / 1000 - currentDate.getTime() / 1000;
-    if (diff >= 0) {
-       $('.clock').show();
-      // Instantiate a coutdown FlipClock
-      clock = $('.clock').FlipClock(diff, {
-          clockFace: 'DailyCounter',
-          countdown: true,
-          callbacks: {
-                stop: function() {
-                    // Do whatever you want to do here,
-                    // that may include hiding the clock 
-                    // or displaying the image you mentioned
-                    $('.clock').hide();
-                    $('.message').show();
-                }
-            }
+      // Grab the current date
+      var currentDate = new Date();
+      // Set some date in the future. In this case, it's always Jan 1
+      // var futureDate  = new Date(2019, 1, 9);
+      var futureDate  = new Date(2019, 1, 7, 19, 12);
+      // Calculate the difference in seconds between the future and current date
+      var diff = futureDate.getTime() / 1000 - currentDate.getTime() / 1000;
+      if (diff >= 0) {
+        $('.clock').show();
+        // Instantiate a coutdown FlipClock
+        clock = $('.clock').FlipClock(diff, {
+            clockFace: 'DailyCounter',
+            countdown: true,
+            callbacks: {
+                  stop: function() {
+                      // Do whatever you want to do here,
+                      // that may include hiding the clock 
+                      // or displaying the image you mentioned
+                      $('.clock').hide();
+                      $('.message').show();
+                  }
+              }
         });
-    } else {
-    $('.clock').hide();
-    $('.message').show();
-    }
-
+      } else {
+        $('.clock').hide();
+        $('.message').show();
+      }
+    });
     </script>
     <script src="lib/firework.js"></script>
   </body>
