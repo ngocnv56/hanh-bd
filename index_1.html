@@ -1,185 +1,306 @@
-<head>
-<style>
-body {
-  margin: 0;
-  background: #020202;
-  cursor: crosshair;
-}
-canvas{display:block}
-h1 {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-family: "Source Sans Pro";
-  font-size: 5em;
-  font-weight: 900;
-  -webkit-user-select: none;
-  user-select: none;
-}
-</style>
-</head>
-<h1>Happy Birthday</h1>
-<canvas id="birthday"></canvas>
-<script>
-// helper functions
-const PI2 = Math.PI * 2
-const random = (min, max) => Math.random() * (max - min + 1) + min | 0
-const timestamp = _ => new Date().getTime()
+<html>
+  <head>
+    <link rel="stylesheet" href="lib/flipclock/flipclock.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <title>Your birthday 2019</title>
+    <script src="lib/flipclock/flipclock.js"></script>
+    
 
-// container
-class Birthday {
-  constructor() {
-    this.resize()
-
-    // create a lovely place to store the firework
-    this.fireworks = []
-    this.counter = 0
-
-  }
- 
-  resize() {
-    this.width = canvas.width = window.innerWidth
-    let center = this.width / 2 | 0
-    this.spawnA = center - center / 4 | 0
-    this.spawnB = center + center / 4 | 0
- 
-    this.height = canvas.height = window.innerHeight
-    this.spawnC = this.height * .1
-    this.spawnD = this.height * .5
- 
-  }
- 
-  onClick(evt) {
-     let x = evt.clientX || evt.touches && evt.touches[0].pageX
-     let y = evt.clientY || evt.touches && evt.touches[0].pageY
- 
-     let count = random(3,5)
-     for(let i = 0; i < count; i++) this.fireworks.push(new Firework(
-        random(this.spawnA, this.spawnB),
-        this.height,
-        x,
-        y,
-        random(0, 260),
-        random(30, 110)))
- 
-     this.counter = -1
- 
-  }
- 
-  update(delta) {
-    ctx.globalCompositeOperation = 'hard-light'
-    ctx.fillStyle = `rgba(20,20,20,${ 7 * delta })`
-    ctx.fillRect(0, 0, this.width, this.height)
-
-    ctx.globalCompositeOperation = 'lighter'
-    for (let firework of this.fireworks) firework.update(delta)
-
-    // if enough time passed... create new new firework
-    this.counter += delta * 3 // each second
-    if (this.counter >= 1) {
-      this.fireworks.push(new Firework(
-        random(this.spawnA, this.spawnB),
-        this.height,
-        random(0, this.width),
-        random(this.spawnC, this.spawnD),
-        random(0, 360),
-        random(30, 110)))
-      this.counter = 0
-    }
-
-    // remove the dead fireworks
-    if (this.fireworks.length > 1000) this.fireworks = this.fireworks.filter(firework => !firework.dead)
-
-  }
-}
-
-class Firework {
-  constructor(x, y, targetX, targetY, shade, offsprings) {
-    this.dead = false
-    this.offsprings = offsprings
-
-    this.x = x
-    this.y = y
-    this.targetX = targetX
-    this.targetY = targetY
-
-    this.shade = shade
-    this.history = []
-  }
-  update(delta) {
-    if (this.dead) return
-
-    let xDiff = this.targetX - this.x
-    let yDiff = this.targetY - this.y
-    if (Math.abs(xDiff) > 3 || Math.abs(yDiff) > 3) { // is still moving
-      this.x += xDiff * 2 * delta
-      this.y += yDiff * 2 * delta
-
-      this.history.push({
-        x: this.x,
-        y: this.y
-      })
-
-      if (this.history.length > 20) this.history.shift()
-
-    } else {
-      if (this.offsprings && !this.madeChilds) {
- 
-        let babies = this.offsprings / 2
-        for (let i = 0; i < babies; i++) {
-          let targetX = this.x + this.offsprings * Math.cos(PI2 * i / babies) | 0
-          let targetY = this.y + this.offsprings * Math.sin(PI2 * i / babies) | 0
-
-          birthday.fireworks.push(new Firework(this.x, this.y, targetX, targetY, this.shade, 0))
-
-        }
-
+    <meta name="theme-color" content="#ffffff">
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css?family=Staatliches');
+      html, body, .container {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
       }
-      this.madeChilds = true
-      this.history.shift()
-    }
- 
-    if (this.history.length === 0) this.dead = true
-    else if (this.offsprings) {
-        for (let i = 0; this.history.length > i; i++) {
-          let point = this.history[i]
-          ctx.beginPath()
-          ctx.fillStyle = 'hsl(' + this.shade + ',100%,' + i + '%)'
-          ctx.arc(point.x, point.y, 1, 0, PI2, false)
-          ctx.fill()
-        }
-      } else {
-      ctx.beginPath()
-      ctx.fillStyle = 'hsl(' + this.shade + ',100%,50%)'
-      ctx.arc(this.x, this.y, 1, 0, PI2, false)
-      ctx.fill()
-    }
+      body {
+        background-color: #000;
+      }
+      canvas {
+        cursor: crosshair;
+        display: block;
+      }
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+      .clock-item {
+        display: inline-block;
+        width: auto;
+        zoom: 1.3;
+      }
+      .flip-clock-label {
+        color: #ccc !important;
+        font-family: 'Staatliches', cursive !important;
+        font-size: 20px;
+      }
+      .flip-clock-dot {
+        background-color: #ccc !important;
+      }
+      .cube{
+    perspective:500px;
+    perspective-origin:50% 300px;
+}
+.cube-face{
+    margin:100px;
+    top:10px;
+    right:55px;
+    width:100px;
+    height:100px;
+    position:relative;
+    transform-style:preserve-3d;
+    animation:up 5s  infinite linear;
+    
+    transition:width 10s linear;
+    opacity:1;
+   
+}
+div:hover{
+    width:100px;
+}
+.cube-face div{
+    width:100px;
+    height:100px;
+    position:relative;
+  animation: up 5s infinite linear;
+    
 
-  }
+}
+.cube-face-front{
+  color: #ffffff;
+  /* margin: 20px; */
+  margin-top: 300px;
+  /* transform: translateX(300px); */
+  font-size: 30px;
+  margin-left: 300px;
+    
 }
 
-let canvas = document.getElementById('birthday')
-let ctx = canvas.getContext('2d')
+.baloon {
+    transform-style: preserve-3d;
+    animation: down 5s infinite linear;
+    transition: width 10s linear;
+    opacity: 1;
+}
+@keyframes up{
+    from {
+    
+    transform:translate(0px,500px);
+    -webkit-transform:translate(0px,-300px);
+    
+    }
+    to {
+    
+    transform:translate(0px, 0px);
+    -webkit-transform:translate(0px, 50px);
+    
+    }
+}
+@keyframes down{
+    from {
+    
+    transform:translate(500px,500px);
+    -webkit-transform:translate(0px,300px);
+    
+    }
+    to {
+    
+    transform:translate(0px, 0px);
+    -webkit-transform:translate(0px,-300px);
+    
+    }    </style>
+  </head>
+  <body>
+    <canvas id="birthday" style="position:absolute; width:100%; height:100%;">Canvas is not supported in your browser.</canvas>
+    <div class="container" style="position:absolute; width:100%; height:100%;">
+      <div class="clock clock-item" style="margin:2em;display: none"></div>
+    </div>
+    <div class="message" style="position:relative;margin:2em; display: none">
+     <div class='cube-face-front'>
+        <img src="./tada.png" style="width: 20px;
+        margin-right: 5px;font-size: 30px"/> CHÚC MỪNG SINH NHẬT <br /><br />
 
-let then = timestamp()
-
-let birthday = new Birthday
-window.onresize = () => birthday.resize()
-document.onclick = evt => birthday.onClick(evt)
-document.ontouchstart = evt => birthday.onClick(evt)
-
-  ;(function loop(){
-      requestAnimationFrame(loop)
-
-      let now = timestamp()
-      let delta = now - then
-
-    then = now
-    birthday.update(delta / 1000)
- 
-
-  })()
-</script>
-
+        <div style="font-size: 20px;">
+          Chúc e thành công trong cv, không cho bug nào thoát, học tập thật tốt, luôn luôn xinh đẹp, chúc e và bạn ấy yêu thương - gắn bó với nhau hơn nữa.
+        </div>
+        <img src="./smile.png" style="width: 20px;
+          margin-left: 5px;font-size: 20px"/> 
+      </div>  
+      <div class='baloon'>
+        <img style="width:300px" src='http://www.iconhot.com/icon/png/event-people/512/balloons-1.png'/>
+      </div>
+       
+    </div>
+    <script type="text/javascript">
+    var clock;
+    $(document).ready(function() {
+      // Grab the current date
+      var currentDate = new Date();
+      // Set some date in the future. In this case, it's always Jan 1
+      // var futureDate  = new Date(2019, 1, 9);
+      var futureDate  = new Date(2019, 1, 7, 20, 09, 36);
+      // Calculate the difference in seconds between the future and current date
+      var diff = futureDate.getTime() / 1000 - currentDate.getTime() / 1000;
+      if (diff >= 0) {
+        $('.clock').show();
+        // Instantiate a coutdown FlipClock
+        clock = $('.clock').FlipClock(diff, {
+            clockFace: 'DailyCounter',
+            countdown: true,
+            callbacks: {
+                  stop: function() {
+                      // Do whatever you want to do here,
+                      // that may include hiding the clock 
+                      // or displaying the image you mentioned
+                      $('.clock').hide();
+                      $('.message').show();
+                  }
+              }
+        });
+      } else {
+        $('.clock').hide();
+        $('.message').show();
+      }
+    });
+    </script>
+    <!-- <script src="lib/firework.js"></script> -->
+    <script>
+      // helper functions
+      const PI2 = Math.PI * 2
+      const random = (min, max) => Math.random() * (max - min + 1) + min | 0
+      const timestamp = _ => new Date().getTime()
+      // container
+      class Birthday {
+        constructor() {
+          this.resize()
+          // create a lovely place to store the firework
+          this.fireworks = []
+          this.counter = 0
+        }
+       
+        resize() {
+          this.width = canvas.width = window.innerWidth
+          let center = this.width / 2 | 0
+          this.spawnA = center - center / 4 | 0
+          this.spawnB = center + center / 4 | 0
+       
+          this.height = canvas.height = window.innerHeight
+          this.spawnC = this.height * .1
+          this.spawnD = this.height * .5
+       
+        }
+       
+        onClick(evt) {
+           let x = evt.clientX || evt.touches && evt.touches[0].pageX
+           let y = evt.clientY || evt.touches && evt.touches[0].pageY
+       
+           let count = random(3,5)
+           for(let i = 0; i < count; i++) this.fireworks.push(new Firework(
+              random(this.spawnA, this.spawnB),
+              this.height,
+              x,
+              y,
+              random(0, 260),
+              random(30, 110)))
+       
+           this.counter = -1
+       
+        }
+       
+        update(delta) {
+          ctx.globalCompositeOperation = 'hard-light'
+          ctx.fillStyle = `rgba(20,20,20,${ 7 * delta })`
+          ctx.fillRect(0, 0, this.width, this.height)
+          ctx.globalCompositeOperation = 'lighter'
+          for (let firework of this.fireworks) firework.update(delta)
+          // if enough time passed... create new new firework
+          this.counter += delta * 3 // each second
+          if (this.counter >= 1) {
+            this.fireworks.push(new Firework(
+              random(this.spawnA, this.spawnB),
+              this.height,
+              random(0, this.width),
+              random(this.spawnC, this.spawnD),
+              random(0, 360),
+              random(30, 110)))
+            this.counter = 0
+          }
+          // remove the dead fireworks
+          if (this.fireworks.length > 1000) this.fireworks = this.fireworks.filter(firework => !firework.dead)
+        }
+      }
+      class Firework {
+        constructor(x, y, targetX, targetY, shade, offsprings) {
+          this.dead = false
+          this.offsprings = offsprings
+          this.x = x
+          this.y = y
+          this.targetX = targetX
+          this.targetY = targetY
+          this.shade = shade
+          this.history = []
+        }
+        update(delta) {
+          if (this.dead) return
+          let xDiff = this.targetX - this.x
+          let yDiff = this.targetY - this.y
+          if (Math.abs(xDiff) > 3 || Math.abs(yDiff) > 3) { // is still moving
+            this.x += xDiff * 2 * delta
+            this.y += yDiff * 2 * delta
+            this.history.push({
+              x: this.x,
+              y: this.y
+            })
+            if (this.history.length > 20) this.history.shift()
+          } else {
+            if (this.offsprings && !this.madeChilds) {
+       
+              let babies = this.offsprings / 2
+              for (let i = 0; i < babies; i++) {
+                let targetX = this.x + this.offsprings * Math.cos(PI2 * i / babies) | 0
+                let targetY = this.y + this.offsprings * Math.sin(PI2 * i / babies) | 0
+                birthday.fireworks.push(new Firework(this.x, this.y, targetX, targetY, this.shade, 0))
+              }
+            }
+            this.madeChilds = true
+            this.history.shift()
+          }
+       
+          if (this.history.length === 0) this.dead = true
+          else if (this.offsprings) {
+              for (let i = 0; this.history.length > i; i++) {
+                let point = this.history[i]
+                ctx.beginPath()
+                ctx.fillStyle = 'hsl(' + this.shade + ',100%,' + i + '%)'
+                ctx.arc(point.x, point.y, 1, 0, PI2, false)
+                ctx.fill()
+              }
+            } else {
+            ctx.beginPath()
+            ctx.fillStyle = 'hsl(' + this.shade + ',100%,50%)'
+            ctx.arc(this.x, this.y, 1, 0, PI2, false)
+            ctx.fill()
+          }
+        }
+      }
+      let canvas = document.getElementById('birthday')
+      let ctx = canvas.getContext('2d')
+      let then = timestamp()
+      let birthday = new Birthday
+      window.onresize = () => birthday.resize()
+      document.onclick = evt => birthday.onClick(evt)
+      document.ontouchstart = evt => birthday.onClick(evt)
+        ;(function loop(){
+            requestAnimationFrame(loop)
+            let now = timestamp()
+            let delta = now - then
+          then = now
+          birthday.update(delta / 1000)
+       
+        })()
+    </script>
+  </body>
+</html>
